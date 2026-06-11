@@ -419,7 +419,8 @@ function cerrarAviso() {
   if (alCerrarAviso) {
     const accion = alCerrarAviso;
     alCerrarAviso = null;
-    accion();
+    // SOLUCIÓN 1: Timeout añadido para evitar bloqueo (glitch) de focus al cerrar el modal.
+    setTimeout(accion, 50);
   }
 }
 
@@ -435,8 +436,15 @@ document.addEventListener('keydown', e => {
 
 function marcarError(elemento) {
   elemento.classList.add('campo-error');
-  elemento.addEventListener('input', () => elemento.classList.remove('campo-error'), { once: true });
-  elemento.addEventListener('change', () => elemento.classList.remove('campo-error'), { once: true });
+  
+  // SOLUCIÓN 2: Función para remover el error y eventos extra (focus, click) añadidos
+  // para destrabar el campo inmediatamente en cuanto el usuario intente interactuar con él.
+  const limpiarError = () => elemento.classList.remove('campo-error');
+  
+  elemento.addEventListener('input', limpiarError, { once: true });
+  elemento.addEventListener('change', limpiarError, { once: true });
+  elemento.addEventListener('focus', limpiarError, { once: true });
+  elemento.addEventListener('click', limpiarError, { once: true });
 }
 
 function validar() {

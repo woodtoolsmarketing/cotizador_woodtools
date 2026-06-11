@@ -506,20 +506,20 @@ body {
   font-size: 15px;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 760px) {
+/* =========================================
+   DISEÑO RESPONSIVO PARA CELULARES
+   ========================================= */
+@media (max-width: 768px) {
+  /* Apilar encabezado */
   .encabezado {
-    flex-wrap: wrap;
-  }
-
-  .bloque-x {
-    order: -1;
-    margin-left: auto;
-  }
-
-  .fila-cliente {
+    display: flex;
     flex-direction: column;
-    gap: 10px;
+    text-align: center;
+    align-items: center;
+  }
+  
+  .logos {
+    justify-content: center;
   }
 
   .logo {
@@ -527,11 +527,44 @@ body {
     height: 80px;
   }
 
-  .detalle {
-    overflow-x: auto;
+  .bloque-x {
+    display: none; /* Ocultamos la X central para ahorrar espacio en la pantalla */
+  }
+  
+  .bloque-titulo {
+    margin-top: 15px;
+    padding-left: 0;
   }
 
+  /* Apilar las columnas (las de 60% y 40% pasan a ocupar el 100% del ancho) */
+  .fila-cliente {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .ancho-60, .ancho-40 {
+    width: 100% !important;
+  }
+
+  /* Permitir que la tabla de ítems se deslice hacia los costados (scroll horizontal) */
+  .detalle {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   #tabla-items {
-    min-width: 760px;
+    min-width: 650px; /* Evita que las columnas de la tabla colapsen */
+  }
+
+  /* Apilar los campos del pie */
+  .pie {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .pie .campo select {
+    flex: 1;
   }
 }
