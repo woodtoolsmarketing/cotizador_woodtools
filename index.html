@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotización - WoodTools</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/png" href="Imagenes/WoodTools.png">
+</head>
+<body>
+
+  <div class="hoja">
+
+    <!-- ====== ENCABEZADO ====== -->
+    <header class="encabezado">
+      <div class="bloque-logos">
+        <div class="logos">
+          <img src="Imagenes/WoodTools.png" alt="WoodTools" class="logo">
+          <img src="Imagenes/WoodTools Diamante.png" alt="WoodTools Diamante" class="logo">
+        </div>
+        <p class="rubro">HERRAMIENTAS PARA LA INDUSTRIA MADERERA</p>
+        <p class="datos-empresa">
+          Wood Tools S.R.L. &middot; Cabildo 61 (1870) Avellaneda<br>
+          Bs. As. &middot; Argentina &middot; Telefax: (54-11) 4218-1700/01<br>
+          E-mail: info@woodtools.com.ar &middot; ventas@woodtools.com.ar<br>
+          www.woodtools.com.ar
+        </p>
+        <p class="iva-empresa">I.V.A. RESPONSABLE INSCRIPTO</p>
+      </div>
+
+      <div class="bloque-x">
+        <span>X</span>
+      </div>
+
+      <div class="bloque-titulo">
+        <p class="no-valido">DOCUMENTO NO VALIDO COMO FACTURA</p>
+        <h1>COTIZACION</h1>
+        <div class="campo-linea">
+          <label for="fecha">FECHA</label>
+          <input type="text" id="fecha" placeholder="dd/mm/aa">
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== DATOS DEL CLIENTE ====== -->
+    <section class="datos-cliente">
+      <div class="fila-cliente">
+        <div class="campo ancho-60">
+          <label for="senores">Señor/es: <span class="obligatorio">*</span></label>
+          <input type="text" id="senores" placeholder="Razón social del cliente">
+        </div>
+        <div class="campo ancho-40">
+          <label for="atsr">At. Sr.: <span class="obligatorio">*</span></label>
+          <input type="text" id="atsr" placeholder="Persona de contacto">
+        </div>
+      </div>
+      <div class="fila-cliente">
+        <div class="campo ancho-60">
+          <label for="domicilio">Domicilio: <span class="obligatorio">*</span></label>
+          <input type="text" id="domicilio">
+        </div>
+      </div>
+      <div class="fila-cliente">
+        <div class="campo ancho-60">
+          <label for="pais">País: <span class="obligatorio">*</span></label>
+          <div class="con-buscador">
+            <input type="text" id="pais" placeholder="Buscar país..." autocomplete="off">
+          </div>
+        </div>
+        <div class="campo ancho-40">
+          <label for="localidad">Localidad: <span class="obligatorio">*</span></label>
+          <div class="con-buscador">
+            <input type="text" id="localidad" placeholder="Buscar localidad..." autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="fila-cliente fila-iva">
+        <div class="campo ancho-60 campo-recuadro">
+          <label for="condicion-iva">I.V.A. <span class="obligatorio">*</span></label>
+          <select id="condicion-iva">
+            <option value="">Seleccionar...</option>
+            <option value="Responsable inscripto 21%">Responsable inscripto 21%</option>
+            <option value="Consumidor final">Consumidor final</option>
+            <option value="Exento">Exento</option>
+          </select>
+        </div>
+        <div class="campo ancho-40 campo-recuadro">
+          <label for="cuit-cliente">C.U.I.T. <span class="obligatorio">*</span></label>
+          <input type="text" id="cuit-cliente" placeholder="30-69114696-7" maxlength="13" inputmode="numeric">
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== LEYENDA ====== -->
+    <section class="leyenda">
+      <p>De nuestra mayor consideración:</p>
+      <p>Por la presente, le suministramos cotización de las herramientas requeridas, según detalle:</p>
+    </section>
+
+    <!-- ====== TABLA DE ITEMS ====== -->
+    <section class="detalle">
+      <table id="tabla-items">
+        <thead>
+          <tr>
+            <th class="col-item">ITEM</th>
+            <th class="col-cant">CANT.</th>
+            <th class="col-desc">DESCRIPCION</th>
+            <th class="col-med">% DE<br>DESCUENTO</th>
+            <th class="col-precio">PRECIO<br>UNITARIO</th>
+            <th class="col-precio">PRECIO<br>TOTAL</th>
+            <th class="col-borrar"></th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-items">
+          <!-- Las filas se agregan por JS -->
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" class="pie-total-etiqueta">PRECIO TOTAL</td>
+            <td id="total-general" class="pie-total-valor">&mdash;</td>
+            <td class="celda-borrar"></td>
+          </tr>
+        </tfoot>
+      </table>
+      <button type="button" id="btn-agregar" class="btn-secundario">+ Agregar ítem</button>
+    </section>
+
+    <!-- ====== PIE ====== -->
+    <section class="pie">
+      <div class="campo">
+        <label for="plazo">Plazo de Entrega: <span class="obligatorio">*</span></label>
+        <input type="text" id="plazo" placeholder="Inmediato">
+      </div>
+      <div class="campo">
+        <label for="vigencia">Vigencia de Cotización: <span class="obligatorio">*</span></label>
+        <input type="text" id="vigencia" placeholder="5 días" inputmode="numeric">
+      </div>
+      <div class="campo">
+        <label for="pago">Condiciones de Pago: <span class="obligatorio">*</span></label>
+        <select id="pago">
+          <option value="">Seleccionar...</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Link de pago">Link de pago</option>
+          <option value="Tarjeta de Débito/Crédito">Tarjeta de Débito/Crédito</option>
+          <option value="Otros">Otros</option>
+        </select>
+        <input type="text" id="pago-otros" class="oculto" placeholder="Detallar condición de pago">
+      </div>
+      <div class="campo">
+        <label for="flete">Flete y Seguro: <span class="obligatorio">*</span></label>
+        <input type="text" id="flete" value="A cargo del comprador">
+      </div>
+      <div class="campo">
+        <label for="tipo-cambio">Tipo de Cambio: <span class="obligatorio">*</span></label>
+        <span class="tc-prefijo">U$ 1 = $</span>
+        <input type="text" id="tipo-cambio" placeholder="1250" inputmode="decimal">
+      </div>
+    </section>
+
+    <!-- ====== ACCIONES ====== -->
+    <div class="acciones">
+      <button type="button" id="btn-terminar" class="btn-principal">Terminar y generar PDF</button>
+    </div>
+
+  </div>
+
+  <!-- ====== AVISO DE CAMPOS FALTANTES ====== -->
+  <div id="aviso-fondo" class="aviso-fondo oculto">
+    <div class="aviso-caja" role="alertdialog" aria-modal="true" aria-labelledby="aviso-titulo">
+      <h2 id="aviso-titulo">Faltan completar estos campos obligatorios</h2>
+      <ul id="aviso-lista"></ul>
+      <button type="button" id="aviso-cerrar" class="btn-principal">Entendido</button>
+    </div>
+  </div>
+
+  <script src="js/lib/jspdf.umd.min.js"></script>
+  <script src="js/lib/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/logos.js"></script>
+  <script src="js/paises.js"></script>
+  <script src="js/localidades_ar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

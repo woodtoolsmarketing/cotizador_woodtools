@@ -1,0 +1,537 @@
+/* ===== Sistema de Cotización WoodTools ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #5a5d63;
+  padding: 24px 12px;
+  color: #1c1c1c;
+}
+
+/* La "hoja" emula el talonario en papel */
+.hoja {
+  max-width: 920px;
+  margin: 0 auto;
+  background: #fbfff9;
+  border: 1.5px solid #444;
+  padding: 18px 22px 26px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== Encabezado ===== */
+.encabezado {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-bottom: 1.5px solid #444;
+  padding-bottom: 12px;
+}
+
+.bloque-logos {
+  flex: 1 1 45%;
+  text-align: center;
+}
+
+.logos {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.logo {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.rubro {
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 4px;
+  letter-spacing: 0.4px;
+}
+
+.datos-empresa {
+  font-size: 10.5px;
+  line-height: 1.45;
+  margin-top: 3px;
+}
+
+.iva-empresa {
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 3px;
+}
+
+.bloque-x {
+  flex: 0 0 56px;
+  border: 2px solid #333;
+  background: #e8e8e8;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.bloque-titulo {
+  flex: 1 1 40%;
+  padding-left: 6px;
+}
+
+.no-valido {
+  font-size: 10.5px;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+}
+
+.bloque-titulo h1 {
+  font-size: 26px;
+  letter-spacing: 1px;
+  margin: 4px 0 6px;
+}
+
+.campo-linea {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.campo-linea label {
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.campo-linea input {
+  flex: 1;
+  font-size: 15px;
+  font-family: inherit;
+  border: none;
+  border-bottom: 1.5px dotted #555;
+  background: transparent;
+  padding: 2px 4px;
+  outline: none;
+}
+
+.campo-linea input:focus {
+  border-bottom-color: #c0181c;
+  background: #fff7f7;
+}
+
+.datos-fiscales {
+  font-size: 10.5px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* ===== Datos del cliente ===== */
+.datos-cliente {
+  padding: 12px 0 6px;
+}
+
+.fila-cliente {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 10px;
+}
+
+.ancho-60 { flex: 1 1 60%; }
+.ancho-40 { flex: 1 1 40%; }
+
+.campo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.campo label {
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.campo input {
+  flex: 1;
+  font-size: 14px;
+  font-family: inherit;
+  border: none;
+  border-bottom: 1.5px dotted #555;
+  background: transparent;
+  padding: 3px 4px;
+  outline: none;
+}
+
+.campo input:focus {
+  border-bottom-color: #c0181c;
+  background: #fff7f7;
+}
+
+.campo select {
+  flex: 1;
+  font-size: 14px;
+  font-family: inherit;
+  border: none;
+  border-bottom: 1.5px dotted #555;
+  background: transparent;
+  padding: 3px 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.campo select:focus {
+  border-bottom-color: #c0181c;
+  background: #fff7f7;
+}
+
+.obligatorio {
+  color: #c0181c;
+}
+
+/* Campos con error de validación */
+.campo-error {
+  background: #ffe3e3 !important;
+  border-bottom: 1.5px solid #c0181c !important;
+}
+
+/* Buscador desplegable (país / localidad) */
+.con-buscador {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.con-buscador input {
+  flex: 1;
+}
+
+.lista-buscador {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #888;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.25);
+  z-index: 60;
+}
+
+.lista-buscador .opcion {
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.lista-buscador .opcion:hover {
+  background: #f6e2e2;
+}
+
+.lista-buscador .aviso {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-style: italic;
+  color: #666;
+}
+
+.oculto {
+  display: none !important;
+}
+
+/* Recuadros de IVA y CUIT como en el talonario */
+.fila-iva .campo-recuadro {
+  border: 1.5px solid #444;
+  padding: 6px 10px;
+  background: #f1f1ec;
+}
+
+.fila-iva .campo-recuadro input,
+.fila-iva .campo-recuadro select {
+  border-bottom: 1.5px dotted #777;
+}
+
+/* ===== Leyenda ===== */
+.leyenda {
+  border-top: 1.5px solid #444;
+  padding: 10px 2px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ===== Tabla de items ===== */
+.detalle {
+  margin-bottom: 14px;
+}
+
+#tabla-items {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.5px solid #444;
+}
+
+#tabla-items th {
+  background: #b9b9b9;
+  border: 1px solid #555;
+  font-size: 10px;
+  padding: 5px 3px;
+  text-align: center;
+  line-height: 1.25;
+}
+
+#tabla-items td {
+  border: 1px solid #777;
+  padding: 0;
+  height: 34px;
+}
+
+#tabla-items td.celda-item {
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  width: 42px;
+  background: #f1f1ec;
+}
+
+#tabla-items td input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 6px;
+  outline: none;
+  text-align: center;
+}
+
+#tabla-items td.celda-desc input {
+  text-align: left;
+}
+
+#tabla-items td input:focus {
+  background: #fff7f7;
+}
+
+.col-item   { width: 42px; }
+.col-cant   { width: 52px; }
+.col-desc   { width: auto; }
+.col-med    { width: 72px; }
+.col-precio { width: 110px; }
+.col-borrar { width: 34px; background: transparent !important; border: none !important; }
+
+#tabla-items td.celda-borrar,
+#tabla-items tfoot td.celda-borrar {
+  border: none;
+  text-align: center;
+  background: transparent;
+}
+
+/* Celda de precio unitario con selector de moneda */
+.celda-moneda {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.inp-moneda {
+  border: none;
+  border-right: 1px solid #aaa;
+  background: #f1f1ec;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+  width: 44px;
+  text-align: center;
+}
+
+#tabla-items td .celda-moneda input {
+  text-align: right;
+}
+
+/* Fila del total general */
+#tabla-items tfoot .pie-total-etiqueta {
+  text-align: right;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 8px 10px;
+  background: #b9b9b9;
+  border: 1px solid #555;
+}
+
+#tabla-items tfoot .pie-total-valor {
+  font-weight: bold;
+  font-size: 13.5px;
+  text-align: right;
+  padding: 8px 6px;
+  background: #f1f1ec;
+  border: 1px solid #555;
+  white-space: nowrap;
+}
+
+.btn-quitar {
+  border: none;
+  background: transparent;
+  color: #c0181c;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+.btn-quitar:hover {
+  transform: scale(1.25);
+}
+
+.btn-secundario {
+  margin-top: 8px;
+  background: #fff;
+  border: 1.5px solid #444;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-secundario:hover {
+  background: #ececec;
+}
+
+/* ===== Pie ===== */
+.pie {
+  border-top: 1.5px solid #444;
+  padding-top: 12px;
+}
+
+.pie .campo {
+  margin-bottom: 10px;
+}
+
+.pie .campo select {
+  flex: 0 1 320px;
+}
+
+#pago-otros {
+  margin-left: 10px;
+}
+
+.tc-prefijo {
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.pie #tipo-cambio {
+  flex: 0 1 160px;
+}
+
+/* ===== Acciones ===== */
+.acciones {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.btn-principal {
+  background: #c0181c;
+  color: #fff;
+  border: none;
+  font-size: 17px;
+  font-weight: bold;
+  font-family: inherit;
+  padding: 13px 44px;
+  cursor: pointer;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.btn-principal:hover {
+  background: #9d1013;
+}
+
+.btn-principal:active {
+  transform: translateY(1px);
+}
+
+/* ===== Aviso de campos faltantes ===== */
+.aviso-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.aviso-caja {
+  background: #fff;
+  border: 2px solid #c0181c;
+  border-radius: 6px;
+  max-width: 440px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.aviso-caja h2 {
+  color: #c0181c;
+  font-size: 17px;
+  margin-bottom: 12px;
+}
+
+#aviso-lista {
+  margin: 0 0 18px 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#aviso-cerrar {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 760px) {
+  .encabezado {
+    flex-wrap: wrap;
+  }
+
+  .bloque-x {
+    order: -1;
+    margin-left: auto;
+  }
+
+  .fila-cliente {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .detalle {
+    overflow-x: auto;
+  }
+
+  #tabla-items {
+    min-width: 760px;
+  }
+}
