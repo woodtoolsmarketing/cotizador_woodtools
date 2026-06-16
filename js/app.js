@@ -135,10 +135,18 @@ const inputLocalidad = document.getElementById('localidad');
 const opcionesPaises = PAISES.map(p => ({ texto: p.es, valor: p.es, en: p.en }));
 const opcionesLocalidadesAr = LOCALIDADES_AR.map(([nombre, provincia]) => ({
   texto: `${nombre} (${provincia})`,
-  valor: nombre
+  valor: nombre,
+  provincia
 }));
 
 const cacheCiudades = {}; // nombre en inglés -> opciones | 'cargando' | 'error'
+
+/* Tierra del Fuego está exenta de I.V.A. (Ley 19.640): cuando la localidad
+   elegida pertenece a esa provincia no se suma el 21% en ningún modo de IVA.
+   La provincia se guarda en el dataset al elegir la localidad del listado. */
+function esTierraDelFuego() {
+  return normalizar(inputLocalidad.dataset.provincia || '').includes('tierra del fuego');
+}
 
 function paisActual() {
   const nombre = normalizar(inputPais.value.trim());
@@ -168,6 +176,8 @@ function cargarCiudades(pais) {
 
 crearBuscador(inputPais, () => opcionesPaises, opcion => {
   inputLocalidad.value = '';
+  delete inputLocalidad.dataset.provincia;
+  sincronizarRecargoUnitario();
   const pais = paisActual();
   if (pais) cargarCiudades(pais);
 });
@@ -180,6 +190,17 @@ crearBuscador(inputLocalidad, () => {
   if (ciudades === 'cargando') return 'Cargando localidades...';
   if (ciudades === 'error' || !ciudades) return 'Sin listado disponible: escribila a mano';
   return ciudades;
+}, opcion => {
+  // Al elegir una localidad del listado se guarda su provincia, para
+  // saber si es Tierra del Fuego (exenta de IVA).
+  inputLocalidad.dataset.provincia = opcion.provincia || '';
+  sincronizarRecargoUnitario();
+});
+
+// Si el usuario edita la localidad a mano, la provincia deja de ser válida.
+inputLocalidad.addEventListener('input', () => {
+  delete inputLocalidad.dataset.provincia;
+  sincronizarRecargoUnitario();
 });
 
 /* ---------- Máscara de C.U.I.T. (XX-XXXXXXXX-X) ---------- */
@@ -219,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   soloNumeros(document.getElementById('vigencia'), { sufijo: ' días' });
   soloNumeros(document.getElementById('tipo-cambio'), { decimales: true });
 
-  document.getElementById('condicion-iva').addEventListener('change', cambioCondicionIva);
+  document.getElementById('condicion-iva').addEventListener('change', sincronizarRecargoUnitario);
   document.getElementById('tipo-cambio').addEventListener('input', actualizarTotal);
 
   agregarFila();
@@ -316,13 +337,19 @@ function esConRecargoEnUnitario(iva) {
   return iva === 'Consumidor final' || iva === 'Exento';
 }
 
+// ¿Corresponde sumar el 21% en el precio unitario? Es así en Consumidor
+// final / Exento, salvo que la localidad sea Tierra del Fuego (sin IVA).
+function recargoUnitarioActivo() {
+  return esConRecargoEnUnitario(valor('condicion-iva')) && !esTierraDelFuego();
+}
+
 // Número apto para volver a escribirse en un input (coma decimal, sin miles)
 function numeroAInput(valorNum) {
   return parseFloat(valorNum.toFixed(2)).toString().replace('.', ',');
 }
 
 function aplicarIvaEnUnitario(input) {
-  if (!esConRecargoEnUnitario(valor('condicion-iva'))) return;
+  if (!recargoUnitarioActivo()) return;
   if (input.dataset.ivaAplicado === '1') return;
   const numero = parsearNumero(input.value);
   if (isNaN(numero) || numero <= 0) return;
@@ -331,17 +358,14 @@ function aplicarIvaEnUnitario(input) {
   actualizarTotal();
 }
 
-/* Al cambiar la condición de IVA se ajustan los precios ya cargados:
-   pasar a Consumidor final/Exento les suma el 21%; volver a
-   Responsable inscripto se los quita (el 21% pasa al total). */
-let ivaAnterior = '';
+/* Al cambiar la condición de IVA o la localidad se ajustan los precios ya
+   cargados: cuando pasa a corresponder el 21% en el unitario se agrega, y
+   cuando deja de corresponder (incluida Tierra del Fuego) se quita. */
+let recargoUnitarioPrevio = false;
 
-function cambioCondicionIva() {
-  const ivaNuevo = valor('condicion-iva');
-  const antes = esConRecargoEnUnitario(ivaAnterior);
-  const ahora = esConRecargoEnUnitario(ivaNuevo);
-
-  if (antes !== ahora) {
+function sincronizarRecargoUnitario() {
+  const ahora = recargoUnitarioActivo();
+  if (ahora !== recargoUnitarioPrevio) {
     for (const fila of cuerpoItems.rows) {
       const input = fila.querySelector('.inp-unit');
       const numero = parsearNumero(input.value);
@@ -350,10 +374,24 @@ function cambioCondicionIva() {
       if (ahora) input.dataset.ivaAplicado = '1';
       else delete input.dataset.ivaAplicado;
     }
+    recargoUnitarioPrevio = ahora;
   }
-
-  ivaAnterior = ivaNuevo;
   actualizarTotal();
+}
+
+/* Precio total de un ítem = precio unitario x cantidad, ya aplicado el
+   descuento. Toma el precio unitario tal como se ve en pantalla (para
+   Consumidor final/Exento ya incluye el 21%). Devuelve NaN si falta el
+   precio unitario. */
+function totalLineaNum(unitStr, descuStr, cantStr) {
+  const unitario = parsearNumero(unitStr);
+  if (isNaN(unitario)) return NaN;
+  let total = unitario;
+  const descuento = parsearNumero(descuStr);
+  if (!isNaN(descuento)) total *= (1 - descuento / 100);
+  const cantidad = parsearNumero(cantStr);
+  total *= (isNaN(cantidad) ? 1 : cantidad);
+  return total;
 }
 
 function calcularTotal() {
@@ -361,18 +399,14 @@ function calcularTotal() {
   let dolares = 0;
 
   for (const item of recolectarItems()) {
-    let unitario = parsearNumero(item.unit);
-    if (isNaN(unitario)) continue;
-    const descuento = parsearNumero(item.descu);
-    if (!isNaN(descuento)) unitario *= (1 - descuento / 100);
-    const cantidad = parsearNumero(item.cant);
-    const subtotal = unitario * (isNaN(cantidad) ? 1 : cantidad);
+    const subtotal = totalLineaNum(item.unit, item.descu, item.cant);
+    if (isNaN(subtotal)) continue;
     if (item.moneda === 'U$') dolares += subtotal;
     else pesos += subtotal;
   }
 
-  // Responsable inscripto: el 21% se suma en el total
-  const factor = valor('condicion-iva') === 'Responsable inscripto 21%' ? 1.21 : 1;
+  // Responsable inscripto: el 21% se suma en el total (salvo Tierra del Fuego)
+  const factor = (valor('condicion-iva') === 'Responsable inscripto 21%' && !esTierraDelFuego()) ? 1.21 : 1;
   pesos *= factor;
   dolares *= factor;
 
@@ -387,7 +421,22 @@ function calcularTotal() {
   return { texto: '$ ' + dinero(pesos + dolares * tipoCambio), valido: true };
 }
 
+/* Refresca la columna "PRECIO TOTAL" de cada fila (unitario x cantidad). */
+function actualizarFilas() {
+  for (const fila of cuerpoItems.rows) {
+    const celda = fila.querySelector('.celda-total-fila');
+    const total = totalLineaNum(
+      fila.querySelector('.inp-unit').value,
+      fila.querySelector('.inp-descu').value,
+      fila.querySelector('.inp-cant').value
+    );
+    const moneda = fila.querySelector('.inp-moneda').value;
+    celda.textContent = isNaN(total) ? '' : `${moneda} ${dinero(total)}`;
+  }
+}
+
 function actualizarTotal() {
+  actualizarFilas();
   document.getElementById('total-general').textContent = calcularTotal().texto;
 }
 
@@ -605,32 +654,67 @@ function generarPDF() {
   doc.text('Por la presente, le suministramos cotización de las herramientas requeridas, según detalle:', 12, y + 5);
 
   // ----- Tabla de items -----
+  // La columna "% DE DESC." solo aparece si algún producto tiene descuento.
+  // Cuando aparece, el valor figura únicamente en la celda del producto que
+  // lo tiene (los demás quedan en blanco).
+  const hayDescuento = items.some(it => {
+    const d = parsearNumero(it.descu);
+    return !isNaN(d) && d > 0;
+  });
+
   const filas = items.map(it => {
     const unitario = parsearNumero(it.unit);
-    return [
-      it.item, it.cant, it.desc, it.descu,
+    const totalLinea = totalLineaNum(it.unit, it.descu, it.cant);
+    const descuento = parsearNumero(it.descu);
+    const descuTexto = (!isNaN(descuento) && descuento > 0) ? it.descu : '';
+    const fila = [
+      it.item, it.cant, it.desc,
       isNaN(unitario) ? '' : `${it.moneda} ${dinero(unitario)}`,
-      ''
+      isNaN(totalLinea) ? '' : `${it.moneda} ${dinero(totalLinea)}`
     ];
+    if (hayDescuento) fila.splice(3, 0, descuTexto); // columna descuento tras DESCRIPCION
+    return fila;
   });
+
+  const columnas = hayDescuento ? 6 : 5;
 
   // Filas vacías de relleno para que el cuadro tenga cuerpo, como el talonario
   while (filas.length < 10) {
-    filas.push(['', '', '', '', '', '']);
+    filas.push(new Array(columnas).fill(''));
   }
+
+  const cabecera = hayDescuento
+    ? ['ITEM', 'CANT.', 'DESCRIPCION', '% DE\nDESC.', 'PRECIO\nUNITARIO', 'PRECIO\nTOTAL']
+    : ['ITEM', 'CANT.', 'DESCRIPCION', 'PRECIO\nUNITARIO', 'PRECIO\nTOTAL'];
+
+  // La descripción absorbe el ancho de la columna de descuento cuando no está
+  const estilosColumnas = hayDescuento
+    ? {
+        0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
+        1: { cellWidth: 14, halign: 'center' },
+        2: { cellWidth: 88 },
+        3: { cellWidth: 16, halign: 'center' },
+        4: { cellWidth: 26, halign: 'right' },
+        5: { cellWidth: 30, halign: 'right' }
+      }
+    : {
+        0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
+        1: { cellWidth: 14, halign: 'center' },
+        2: { cellWidth: 104 },
+        3: { cellWidth: 26, halign: 'right' },
+        4: { cellWidth: 30, halign: 'right' }
+      };
 
   doc.autoTable({
     startY: y + 9,
     margin: { left: 12, right: 12 },
     theme: 'grid',
-    head: [[
-      'ITEM', 'CANT.', 'DESCRIPCION', '% DE\nDESC.', 'PRECIO\nUNITARIO', 'PRECIO\nTOTAL'
-    ]],
+    head: [cabecera],
     body: filas,
     foot: [[
       {
         content: 'PRECIO TOTAL',
-        colSpan: 5,
+        colSpan: columnas - 1,
         styles: { halign: 'right', fontStyle: 'bold', fillColor: GRIS_CABECERA, textColor: 20, fontSize: 8 }
       },
       {
@@ -661,14 +745,7 @@ function generarPDF() {
       lineColor: [90, 90, 90],
       lineWidth: 0.25
     },
-    columnStyles: {
-      0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
-      1: { cellWidth: 14, halign: 'center' },
-      2: { cellWidth: 88 },
-      3: { cellWidth: 16, halign: 'center' },
-      4: { cellWidth: 26, halign: 'right' },
-      5: { cellWidth: 30, halign: 'right' }
-    }
+    columnStyles: estilosColumnas
   });
 
   // ----- Cuadro del pie -----

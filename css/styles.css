@@ -359,6 +359,16 @@ body {
   text-align: right;
 }
 
+/* Precio total de cada fila (unitario x cantidad) */
+#tabla-items td.celda-total-fila {
+  text-align: right;
+  padding: 0 8px;
+  font-size: 12.5px;
+  font-weight: bold;
+  white-space: nowrap;
+  background: #f7f7f3;
+}
+
 /* Fila del total general */
 #tabla-items tfoot .pie-total-etiqueta {
   text-align: right;

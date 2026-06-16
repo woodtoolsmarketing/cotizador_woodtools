@@ -43,10 +43,12 @@ La única forma de que nunca aparezca, incluso bajándolo de internet, es firmar
 - **Localidad**: buscador según el país elegido. Para Argentina el listado está incluido (funciona sin internet); para otros países se consulta una API por internet, y si no hay conexión se puede escribir a mano.
 - **C.U.I.T.**: se formatea solo con los guiones (XX-XXXXXXXX-X).
 - **I.V.A.**: selector. Con "Consumidor final" o "Exento", el 21% se suma directo en el precio unitario apenas se termina de escribir el número (y si se cambia la condición después, los precios ya cargados se ajustan solos). Con "Responsable inscripto 21%", el precio unitario queda como se ingresó y el 21% se suma en el precio total.
+- **Tierra del Fuego**: si la localidad elegida (del listado) pertenece a la provincia de Tierra del Fuego, no se suma el 21% en ninguno de los tres modos de IVA (exención de la Ley 19.640). Al seleccionar/quitar una localidad de Tierra del Fuego, los precios ya cargados se reajustan solos.
 - **Cantidad**: solo números.
-- **% de descuento**: solo números, con "%" automático. Se descuenta del precio unitario del ítem en el total.
+- **% de descuento**: solo números, con "%" automático. Se descuenta del precio unitario del ítem en el total. En el PDF, la columna "% DE DESC." aparece solo si algún producto tiene descuento; cuando aparece, el valor figura únicamente en la celda del producto que lo tiene.
 - **Precio unitario**: selector de moneda ($ pesos / U$ dólares) + valor.
-- **Precio total**: suma de cantidad × precio unitario de cada ítem. Si todos son pesos, da en pesos; si todos son dólares, en dólares; si hay mezcla, los dólares se pasan a pesos con el tipo de cambio.
+- **Precio total (por fila)**: se calcula solo = precio unitario × cantidad de ese ítem (ya con el descuento aplicado), en la moneda de la fila.
+- **Precio total (general)**: suma de cantidad × precio unitario de todos los ítems. Si todos son pesos, da en pesos; si todos son dólares, en dólares; si hay mezcla, los dólares se pasan a pesos con el tipo de cambio.
 - **Vigencia de Cotización**: solo números, con " días" automático.
 - **Condiciones de Pago**: selector (Transferencia, Efectivo, Link de pago, Tarjeta de Débito/Crédito, Otros). Con "Otros" aparece un campo para detallar.
 - **Tipo de Cambio**: valor de U$ 1 en pesos. Obligatorio; se usa para convertir los ítems en dólares.
