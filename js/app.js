@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tipo-cambio').addEventListener('input', actualizarTotal);
 
   agregarFila();
+  actualizarTotal();
 });
 
 btnAgregar.addEventListener('click', agregarFila);
@@ -394,22 +395,22 @@ function totalLineaNum(unitStr, descuStr, cantStr) {
   return total;
 }
 
-function calcularTotal() {
+/* Suma los productos separando por moneda, sin aplicar IVA. */
+function sumarProductos() {
   let pesos = 0;
   let dolares = 0;
-
   for (const item of recolectarItems()) {
     const subtotal = totalLineaNum(item.unit, item.descu, item.cant);
     if (isNaN(subtotal)) continue;
     if (item.moneda === 'U$') dolares += subtotal;
     else pesos += subtotal;
   }
+  return { pesos, dolares };
+}
 
-  // Responsable inscripto: el 21% se suma en el total (salvo Tierra del Fuego)
-  const factor = (valor('condicion-iva') === 'Responsable inscripto 21%' && !esTierraDelFuego()) ? 1.21 : 1;
-  pesos *= factor;
-  dolares *= factor;
-
+/* Da el texto de un monto según las monedas: todo en $ o todo en U$; si hay
+   mezcla, los U$ se pasan a $ con el tipo de cambio. */
+function formatearMonto(pesos, dolares) {
   if (pesos === 0 && dolares === 0) return { texto: '—', valido: false };
   if (dolares === 0) return { texto: '$ ' + dinero(pesos), valido: true };
   if (pesos === 0) return { texto: 'U$ ' + dinero(dolares), valido: true };
@@ -419,6 +420,17 @@ function calcularTotal() {
     return { texto: 'Falta el tipo de cambio', valido: false };
   }
   return { texto: '$ ' + dinero(pesos + dolares * tipoCambio), valido: true };
+}
+
+// ¿El 21% se suma en el total? (Responsable inscripto, salvo Tierra del Fuego)
+function ivaEnTotal() {
+  return valor('condicion-iva') === 'Responsable inscripto 21%' && !esTierraDelFuego();
+}
+
+function calcularTotal() {
+  const { pesos, dolares } = sumarProductos();
+  const factor = ivaEnTotal() ? 1.21 : 1;
+  return formatearMonto(pesos * factor, dolares * factor);
 }
 
 /* Refresca la columna "PRECIO TOTAL" de cada fila (unitario x cantidad). */
@@ -435,9 +447,31 @@ function actualizarFilas() {
   }
 }
 
+/* Datos del pie de la tabla. Con Responsable inscripto se muestran dos
+   renglones: "Subtotal" (sin IVA) y "Subtotal con IVA". En los demás casos,
+   un único "PRECIO TOTAL". */
+function renglonesPie() {
+  const { pesos, dolares } = sumarProductos();
+  if (ivaEnTotal()) {
+    return [
+      { etiqueta: 'Subtotal', texto: formatearMonto(pesos, dolares).texto, destacado: false },
+      { etiqueta: 'Subtotal con IVA', texto: formatearMonto(pesos * 1.21, dolares * 1.21).texto, destacado: true }
+    ];
+  }
+  return [
+    { etiqueta: 'PRECIO TOTAL', texto: formatearMonto(pesos, dolares).texto, destacado: true }
+  ];
+}
+
 function actualizarTotal() {
   actualizarFilas();
-  document.getElementById('total-general').textContent = calcularTotal().texto;
+  const pie = document.getElementById('pie-tabla');
+  pie.innerHTML = renglonesPie().map(r => `
+    <tr>
+      <td colspan="5" class="pie-total-etiqueta">${r.etiqueta}</td>
+      <td class="pie-total-valor${r.destacado ? ' pie-total-destacado' : ''}">${r.texto}</td>
+      <td class="celda-borrar"></td>
+    </tr>`).join('');
 }
 
 /* ---------- Aviso de campos faltantes ----------
@@ -502,14 +536,10 @@ function validar() {
 
   const faltantes = [];
 
+  // Los datos del cliente (Señor/es, At. Sr., Domicilio, País, Localidad,
+  // I.V.A., C.U.I.T.) NO son obligatorios. Solo se exigen los campos del pie
+  // y al menos un ítem cargado.
   const obligatorios = [
-    ['senores', 'Señor/es'],
-    ['atsr', 'At. Sr.'],
-    ['domicilio', 'Domicilio'],
-    ['pais', 'País'],
-    ['localidad', 'Localidad'],
-    ['condicion-iva', 'I.V.A.'],
-    ['cuit-cliente', 'C.U.I.T.'],
     ['plazo', 'Plazo de Entrega'],
     ['vigencia', 'Vigencia de Cotización'],
     ['pago', 'Condiciones de Pago'],
@@ -562,7 +592,6 @@ function generarPDF() {
   }
 
   const items = recolectarItems();
-  const total = calcularTotal();
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -705,23 +734,27 @@ function generarPDF() {
         4: { cellWidth: 30, halign: 'right' }
       };
 
+  // Pie: un "PRECIO TOTAL", o "Subtotal" + "Subtotal con IVA" si es
+  // Responsable inscripto (mismos renglones que muestra la web).
+  const piePDF = renglonesPie().map(r => [
+    {
+      content: r.etiqueta,
+      colSpan: columnas - 1,
+      styles: { halign: 'right', fontStyle: 'bold', fillColor: GRIS_CABECERA, textColor: 20, fontSize: 8 }
+    },
+    {
+      content: r.texto,
+      styles: { halign: 'right', fontStyle: 'bold', fillColor: GRIS_ETIQUETA, textColor: 20, fontSize: 8.5 }
+    }
+  ]);
+
   doc.autoTable({
     startY: y + 9,
     margin: { left: 12, right: 12 },
     theme: 'grid',
     head: [cabecera],
     body: filas,
-    foot: [[
-      {
-        content: 'PRECIO TOTAL',
-        colSpan: columnas - 1,
-        styles: { halign: 'right', fontStyle: 'bold', fillColor: GRIS_CABECERA, textColor: 20, fontSize: 8 }
-      },
-      {
-        content: total.texto,
-        styles: { halign: 'right', fontStyle: 'bold', fillColor: GRIS_ETIQUETA, textColor: 20, fontSize: 8.5 }
-      }
-    ]],
+    foot: piePDF,
     headStyles: {
       fillColor: GRIS_CABECERA,
       textColor: 20,
@@ -785,5 +818,8 @@ function generarPDF() {
 
   const cliente = valor('senores').replace(/[\\/:*?"<>|]/g, '').trim().replace(/\s+/g, '-');
   const fechaArchivo = valor('fecha').replace(/\//g, '-');
-  doc.save(`Cotizacion_${cliente}_${fechaArchivo}.pdf`);
+  const nombreArchivo = cliente
+    ? `Cotizacion_${cliente}_${fechaArchivo}.pdf`
+    : `Cotizacion_${fechaArchivo}.pdf`;
+  doc.save(nombreArchivo);
 }

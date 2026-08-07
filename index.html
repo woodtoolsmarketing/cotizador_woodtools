@@ -46,29 +46,29 @@
     <section class="datos-cliente">
       <div class="fila-cliente">
         <div class="campo ancho-60">
-          <label for="senores">Señor/es: <span class="obligatorio">*</span></label>
+          <label for="senores">Señor/es:</label>
           <input type="text" id="senores" placeholder="Razón social del cliente">
         </div>
         <div class="campo ancho-40">
-          <label for="atsr">At. Sr.: <span class="obligatorio">*</span></label>
+          <label for="atsr">At. Sr.:</label>
           <input type="text" id="atsr" placeholder="Persona de contacto">
         </div>
       </div>
       <div class="fila-cliente">
         <div class="campo ancho-60">
-          <label for="domicilio">Domicilio: <span class="obligatorio">*</span></label>
+          <label for="domicilio">Domicilio:</label>
           <input type="text" id="domicilio">
         </div>
       </div>
       <div class="fila-cliente">
         <div class="campo ancho-60">
-          <label for="pais">País: <span class="obligatorio">*</span></label>
+          <label for="pais">País:</label>
           <div class="con-buscador">
             <input type="text" id="pais" placeholder="Buscar país..." autocomplete="off">
           </div>
         </div>
         <div class="campo ancho-40">
-          <label for="localidad">Localidad: <span class="obligatorio">*</span></label>
+          <label for="localidad">Localidad:</label>
           <div class="con-buscador">
             <input type="text" id="localidad" placeholder="Buscar localidad..." autocomplete="off">
           </div>
@@ -76,7 +76,7 @@
       </div>
       <div class="fila-cliente fila-iva">
         <div class="campo ancho-60 campo-recuadro">
-          <label for="condicion-iva">I.V.A. <span class="obligatorio">*</span></label>
+          <label for="condicion-iva">I.V.A.</label>
           <select id="condicion-iva">
             <option value="">Seleccionar...</option>
             <option value="Responsable inscripto 21%">Responsable inscripto 21%</option>
@@ -85,7 +85,7 @@
           </select>
         </div>
         <div class="campo ancho-40 campo-recuadro">
-          <label for="cuit-cliente">C.U.I.T. <span class="obligatorio">*</span></label>
+          <label for="cuit-cliente">C.U.I.T.</label>
           <input type="text" id="cuit-cliente" placeholder="30-69114696-7" maxlength="13" inputmode="numeric">
         </div>
       </div>
@@ -114,12 +114,8 @@
         <tbody id="cuerpo-items">
           <!-- Las filas se agregan por JS -->
         </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5" class="pie-total-etiqueta">PRECIO TOTAL</td>
-            <td id="total-general" class="pie-total-valor">&mdash;</td>
-            <td class="celda-borrar"></td>
-          </tr>
+        <tfoot id="pie-tabla">
+          <!-- Las filas de total (o Subtotal / Subtotal con IVA) se generan por JS -->
         </tfoot>
       </table>
       <button type="button" id="btn-agregar" class="btn-secundario">+ Agregar ítem</button>

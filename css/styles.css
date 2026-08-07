@@ -381,12 +381,18 @@ body {
 
 #tabla-items tfoot .pie-total-valor {
   font-weight: bold;
-  font-size: 13.5px;
+  font-size: 13px;
   text-align: right;
   padding: 8px 6px;
   background: #f1f1ec;
   border: 1px solid #555;
   white-space: nowrap;
+}
+
+/* Renglón final destacado (PRECIO TOTAL o Subtotal con IVA) */
+#tabla-items tfoot .pie-total-destacado {
+  font-size: 14px;
+  background: #e7e7df;
 }
 
 .btn-quitar {

@@ -5,7 +5,7 @@ Formulario que replica el talonario de cotización de Wood Tools S.R.L. y genera
 ## Cómo usarlo
 
 1. Abrir la aplicación **Cotizaciones WoodTools** (o `index.html` en el navegador: doble clic alcanza, no necesita servidor).
-2. Completar los datos. Los campos con asterisco rojo (*) son obligatorios: si falta alguno, al generar el PDF avisa cuáles son y los marca en rojo.
+2. Completar los datos. Los datos del cliente (Señor/es, At. Sr., Domicilio, País, Localidad, I.V.A., C.U.I.T.) son opcionales. Los campos con asterisco rojo (*) — los del pie (Plazo de Entrega, Vigencia, Condiciones de Pago, Flete y Seguro, Tipo de Cambio) y al menos un ítem — sí son obligatorios: si falta alguno, al generar el PDF avisa cuáles son y los marca en rojo.
 3. Apretar **Terminar y generar PDF**: se descarga `Cotizacion_<cliente>_<fecha>.pdf` con el mismo formato del talonario.
 
 ## Aplicación de escritorio (para varias PC)
@@ -42,7 +42,7 @@ La única forma de que nunca aparezca, incluso bajándolo de internet, es firmar
 - **País**: buscador con todos los países (Argentina primera y precargada).
 - **Localidad**: buscador según el país elegido. Para Argentina el listado está incluido (funciona sin internet); para otros países se consulta una API por internet, y si no hay conexión se puede escribir a mano.
 - **C.U.I.T.**: se formatea solo con los guiones (XX-XXXXXXXX-X).
-- **I.V.A.**: selector. Con "Consumidor final" o "Exento", el 21% se suma directo en el precio unitario apenas se termina de escribir el número (y si se cambia la condición después, los precios ya cargados se ajustan solos). Con "Responsable inscripto 21%", el precio unitario queda como se ingresó y el 21% se suma en el precio total.
+- **I.V.A.**: selector. Con "Consumidor final" o "Exento", el 21% se suma directo en el precio unitario apenas se termina de escribir el número (y si se cambia la condición después, los precios ya cargados se ajustan solos). Con "Responsable inscripto 21%", el precio unitario queda como se ingresó y el pie muestra dos renglones: "Subtotal" (sin IVA) y "Subtotal con IVA" (con el 21% sumado). En los demás modos el pie muestra un único "PRECIO TOTAL".
 - **Tierra del Fuego**: si la localidad elegida (del listado) pertenece a la provincia de Tierra del Fuego, no se suma el 21% en ninguno de los tres modos de IVA (exención de la Ley 19.640). Al seleccionar/quitar una localidad de Tierra del Fuego, los precios ya cargados se reajustan solos.
 - **Cantidad**: solo números.
 - **% de descuento**: solo números, con "%" automático. Se descuenta del precio unitario del ítem en el total. En el PDF, la columna "% DE DESC." aparece solo si algún producto tiene descuento; cuando aparece, el valor figura únicamente en la celda del producto que lo tiene.
