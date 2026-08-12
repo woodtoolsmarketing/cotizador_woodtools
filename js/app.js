@@ -554,12 +554,6 @@ function validar() {
     }
   }
 
-  // CUIT completo (XX-XXXXXXXX-X)
-  const cuit = valor('cuit-cliente');
-  if (cuit !== '' && cuit.length !== 13) {
-    faltantes.push({ el: inputCuit, etiqueta: 'C.U.I.T. (incompleto)' });
-  }
-
   // Condición de pago "Otros" con detalle
   if (selectPago.value === 'Otros' && valor('pago-otros') === '') {
     faltantes.push({ el: inputPagoOtros, etiqueta: 'Condiciones de Pago (detalle de "Otros")' });
