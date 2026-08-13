@@ -1,0 +1,18 @@
+# Configuración de Render para el Cotizador WoodTools.
+# El sitio es 100% estático (HTML/CSS/JS que corre en el navegador; el PDF se
+# arma con jsPDF del lado del cliente), así que se publica como "Static Site":
+# Render NO ejecuta nada, solo sirve los archivos del repo.
+#
+# La parte de Electron (electron/, electron-builder) es solo para armar el .exe
+# de escritorio y no interviene en el sitio web.
+
+services:
+  - type: web
+    name: cotizador-woodtools
+    runtime: static
+    # No hay nada que compilar: los archivos ya están listos para servir.
+    buildCommand: ""
+    # Carpeta a publicar: la raíz del repo, donde está index.html.
+    staticPublishPath: .
+    # Redespliega solo cuando cambian archivos del sitio.
+    autoDeploy: true
